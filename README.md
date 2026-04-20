@@ -19,6 +19,16 @@ Fork or clone this repository to begin the paid engineering test. You have **3.5
 
 ## Running locally
 
+**Step 1 — create a `.env` file in the project root with:**
+
+```
+DATABASE_URL="file:./dev.db"
+```
+
+This is required before any Prisma migrate/push command. Prisma v7 reads `DATABASE_URL` from `prisma.config.ts` → `process.env`, so without the `.env` file, migrations will fail.
+
+**Step 2 — install, generate, run:**
+
 ```bash
 npm install
 npx prisma generate
@@ -26,6 +36,8 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The homepage placeholder tells you where to start.
+
+> **Stack note:** this starter uses **Next.js 16, React 19, Prisma 7, and Tailwind 4**. Some APIs differ from earlier major versions (e.g. Prisma's generated client now lives at `src/generated/prisma`, not `@prisma/client`). If something behaves differently than you expect, check `node_modules/next/dist/docs/` or the Prisma v7 docs.
 
 > **Note:** A `dev.db` SQLite file will be created locally when you run migrations. It is gitignored — do not commit it.
 
@@ -73,9 +85,9 @@ Open [http://localhost:3000](http://localhost:3000). The homepage placeholder te
 - **`data/listings.json`** contains **2 entries** with `submarket = "Grand Central"` and **1 entry** with `submarket = "Grand Central Area"`. Your search and normalization logic must handle both spellings gracefully.
 
 - **`data/buildium_export.zip`** contains deliberate messiness that mirrors real production exports. Do **not** silently drop bad rows — surface them in the import preview step:
-  - `tenants.csv`: 3 duplicate email rows, 5 missing phone numbers, 2 malformed email addresses, 1 em-dash in a last name, mixed date formats (MM/DD/YYYY and YYYY-MM-DD)
-  - `units.csv`: 3 property-name variations that refer to the same building (`"1234 Elm St"`, `"1234 Elm Street"`, `"1234 Elm St."`), 2 rows with negative square footage, 1 NULL monthly rent target
-  - `leases.csv`: 8 orphan `tenant_id` references not present in `tenants.csv`, 4 leases where `end_date` is before `start_date`, 2 overlapping active leases on the same unit
-  - `charges.csv`: 12 orphan `lease_id` references, 3 rows with negative amounts
-  - `payments.csv`: 5 orphan `lease_id` references, 2 zero-amount payments, 4 split payments (same lease + same date across two rows)
-  - `work_orders.csv`: 5 open orders with no `closed_date`, 3 descriptions in Spanish (UTF-8 encoding test), 1 vendor with an apostrophe (`O'Malley & Sons`), 2 rows with negative cost
+  - `tenants.csv`: duplicate email rows, missing phone numbers, malformed email addresses, em-dash in a last name, mixed date formats (MM/DD/YYYY and YYYY-MM-DD)
+  - `units.csv`: property-name variations that refer to the same building (`"1234 Elm St"`, `"1234 Elm Street"`, `"1234 Elm St."`), rows with negative square footage, NULL monthly rent target
+  - `leases.csv`: orphan `tenant_id` references not present in `tenants.csv`, leases where `end_date` is before `start_date`, overlapping active leases on the same unit
+  - `charges.csv`: orphan `lease_id` references, rows with negative amounts
+  - `payments.csv`: orphan `lease_id` references, zero-amount payments, split payments (same lease + same date across two rows)
+  - `work_orders.csv`: open orders with no `closed_date`, descriptions in Spanish (UTF-8 encoding test), vendor names with apostrophes (`O'Malley & Sons`), rows with negative cost
