@@ -182,6 +182,8 @@ When your 3.5 hours are up, email Ross (ross@rdeadvisors.com) with:
 
 1. GitHub repo URL
 2. Live deploy URL
+
+   **The deploy URL must be publicly accessible — no Vercel SSO, no password protection, no authentication wall. If we can't view the running app without credentials, we can't grade it.**
 3. Loom URL
 4. PayPal / Wise / bank details for the $100 payment
 

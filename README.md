@@ -51,6 +51,24 @@ Open [http://localhost:3000](http://localhost:3000). The homepage placeholder te
 
 ---
 
+## Deploying to Vercel
+
+**Important:** The default SQLite setup (`file:./dev.db`) does NOT work on Vercel serverless — Vercel's runtime filesystem is read-only except for `/tmp`, which won't persist across function invocations. For the live deploy you need a hosted Postgres database.
+
+Recommended (free tier, ~3 minutes to set up): [Neon](https://neon.tech). Sign up, create a project, copy the connection string.
+
+To switch from SQLite to Postgres:
+
+1. In `prisma/schema.prisma`, change `provider = "sqlite"` to `provider = "postgresql"`.
+2. In your Vercel project dashboard → Settings → Environment Variables, add `DATABASE_URL` with your Neon connection string.
+3. From your local machine with the Neon URL in a local `.env` file, run `npx prisma migrate dev --name init` to create the migration, commit the `prisma/migrations/` folder, and push.
+4. On Vercel, `prisma migrate deploy` runs automatically during build (via the updated `build` script in `package.json`).
+5. Make sure Vercel's Deployment Protection is OFF for this project (Settings → Deployment Protection → None) so the deploy URL is publicly accessible — your submission requires a public URL, not one behind SSO or a password.
+
+Local development still works with SQLite — just keep your local `.env` pointed at `file:./dev.db` for dev, and the Vercel env var pointed at Neon for prod.
+
+---
+
 ## Scope at a glance
 
 See [`TEST_SPEC.md`](./TEST_SPEC.md) for full detail.
