@@ -67,7 +67,9 @@ To switch from SQLite to Postgres:
 > 1. Delete the existing migrations folder:
 >    - macOS/Linux: `rm -rf prisma/migrations/`
 >    - Windows: `rmdir /s /q prisma\migrations`
-> 2. Update your local `.env` so `DATABASE_URL` points at your Neon connection string (temporarily — you can swap back to SQLite after committing).
+> 2. Update your local `.env` so `DATABASE_URL` points at your Neon connection string. Use Neon's **direct** (unpooled) connection — not the pooled/pgbouncer one — or migrations will fail. Format: `postgresql://user:pass@host/db?sslmode=require`.
+>
+>    After committing the Postgres-flavored migrations, keep your local `.env` pointed at Neon for the rest of the test. Swapping back to SQLite locally will cause provider-mismatch errors on the next `prisma migrate dev` against the committed Postgres migrations.
 > 3. Proceed with Step 3 below. `prisma migrate dev` will now generate Postgres-flavored migrations.
 
 3. Run `npx prisma migrate dev --name init` locally once to generate the migration files in `prisma/migrations/` — commit those files. On Vercel, the build script runs `prisma migrate deploy` to apply them.
