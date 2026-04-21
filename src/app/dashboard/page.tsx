@@ -42,7 +42,7 @@ export default async function DashboardPage() {
               Property Management · portfolio dashboard
             </p>
             <h1 className="mt-2 font-display text-4xl sm:text-5xl text-ink leading-tight">
-              Monday morning.
+              What needs your attention.
             </h1>
           </div>
           {snap.importReady && (
