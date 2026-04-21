@@ -28,6 +28,8 @@ Fork or clone this repository to begin the paid engineering test. You have **3.5
 DATABASE_URL="file:./dev.db"
 ```
 
+> **Heads-up:** this `file:./dev.db` URL is only for your initial local setup. Later in the test, the "Deploying to Vercel" section will have you repoint this to Neon Postgres — see Deploy Step 3.
+
 This is required before any Prisma migrate/push command. Prisma v7 reads `DATABASE_URL` from `prisma.config.ts` → `process.env`, so without the `.env` file, migrations will fail.
 
 **Step 2 — install, generate, run:**
@@ -65,11 +67,13 @@ To switch from SQLite to Postgres:
 - macOS/Linux: `rm -rf prisma/migrations/`
 - Windows: `rmdir /s /q prisma\migrations`
 
-**Step 3.** Point your local `.env` `DATABASE_URL` at your Neon **direct** (unpooled) connection string — NOT the pooled/pgbouncer one, or migrations will fail. Format: `postgresql://user:pass@host/db?sslmode=require`. Keep your local `.env` on Neon for the rest of the test — swapping back to SQLite locally will cause provider-mismatch errors on the next `prisma migrate dev`.
+**Step 3.** Point your local `.env` `DATABASE_URL` at your Neon **direct** (unpooled) connection string — NOT the pooled/pgbouncer one, or migrations will fail. Format: `postgresql://user:pass@host/db?sslmode=require`.
+
+From this point on, your local `.env` must stay on Neon for the rest of the test. The `file:./dev.db` URL shown in "Running locally" Step 1 was for INITIAL local setup only — if you swap back to SQLite after this point, the next `prisma migrate dev` will error with a provider mismatch and corrupt your migrations folder. Do not re-read "Running locally" for env config once you've started the Deploy section.
 
 **Step 4.** In your Vercel project dashboard → Settings → Environment Variables, add `DATABASE_URL` with your Neon connection string (the direct connection is fine here too).
 
-**Step 5.** Run `npx prisma migrate dev --name init` locally to generate fresh Postgres-flavored migration files in `prisma/migrations/` — commit those files.
+**Step 5.** Run `npx prisma migrate dev --name init` locally to regenerate the migrations folder — this creates fresh Postgres-flavored migration files to replace the SQLite-flavored ones you deleted in Step 2. Commit the new `prisma/migrations/` files.
 
 **Step 6.** On Vercel, `prisma migrate deploy` runs automatically during build (via the updated `build` script in `package.json`) to apply them.
 
