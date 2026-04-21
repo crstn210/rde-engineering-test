@@ -1,43 +1,59 @@
 @import "tailwindcss";
 
+/* Editorial NYC palette — warm cream, deep ink, terracotta accent.
+   Palette is fixed (no auto dark-mode flip) so the brand reads the same
+   for every visitor. */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:           #f5f1ea;   /* warm cream */
+  --bg-card:      #ffffff;   /* paper white for cards/inputs */
+  --bg-sunken:    #ede7dc;   /* deeper cream for sections */
+  --ink:          #1a1a18;   /* near-black ink */
+  --ink-soft:     #3d3a34;   /* body copy */
+  --ink-muted:    #6b6760;   /* captions */
+  --ink-faint:    #a8a29c;
+  --line:         #e2dacb;   /* hairline borders */
+  --accent:       #c2410c;   /* terracotta */
+  --accent-dark:  #9a3412;
+  --accent-soft:  #fde8d8;   /* tinted background for accent fills */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
 
-  /* Neutral palette */
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
-
-  /* Brand blue */
-  --color-brand: #0F3D91;
-  --color-brand-light: #1a52c4;
-  --color-brand-dark: #0a2d6e;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Re-expose the palette as tailwind tokens so we can write
+     `bg-bg`, `text-ink`, `border-line`, `text-accent`, etc. */
+  --color-bg: var(--bg);
+  --color-bg-card: var(--bg-card);
+  --color-bg-sunken: var(--bg-sunken);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-soft: var(--accent-soft);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Typographic helpers */
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-optical-sizing: auto;
+}
+
+input.chat-input::placeholder {
+  color: var(--ink-faint);
 }
