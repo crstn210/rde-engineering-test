@@ -71,7 +71,7 @@ To switch from SQLite to Postgres:
 
 From this point on, your local `.env` must stay on Neon for the rest of the test. The `file:./dev.db` URL shown in "Running locally" Step 1 was for INITIAL local setup only — if you swap back to SQLite after this point, the next `prisma migrate dev` will error with a provider mismatch and corrupt your migrations folder. From here on, rely on this section (not "Running locally") for env configuration.
 
-**Step 4.** In your Vercel project dashboard → Settings → Environment Variables, add `DATABASE_URL` with your Neon connection string (the direct connection is fine here too).
+**Step 4.** In the Vercel dashboard → Settings → Environment Variables, add `DATABASE_URL` with your Neon **direct (unpooled)** connection string — the same one you pasted in `.env` in Step 3. Do NOT use the pooled (pgbouncer) URL here; the build-time `prisma migrate deploy` can flake against the pooler. Check all three scopes (Production, Preview, and Development) so preview deploys also work.
 
 **Step 5.** Run `npx prisma migrate dev --name init` locally to regenerate the migrations folder — this creates fresh Postgres-flavored migration files to replace the SQLite-flavored ones you deleted in Step 2. Commit the new `prisma/migrations/` files.
 

@@ -1,6 +1,7 @@
 {
   "name": "test-starter-2026-04",
   "version": "0.1.0",
+  "engines": { "node": ">=20.0.0" },
   "private": true,
   "scripts": {
     "dev": "next dev",
