@@ -7,7 +7,131 @@ datasource db {
   provider = "sqlite"
 }
 
-model StarterPlaceholder {
-  id        Int      @id @default(autoincrement())
+// -----------------------------------------------------------------------------
+// BTS — office listings. Minimal here; canonical source remains /data/listings.json.
+// We don't mirror listings into Prisma during this build (would burn time for no
+// gain on 25 rows). If BTS grew to real scale, listings go here with a Building
+// table upstream. See SUBMISSION.md decisions.
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// PM platform — production-shaped schema. Modeled with lease history + charge
+// ledger + payment ledger so phase-2 GL bolts on cleanly (every charge/payment
+// carries an optional accountCode reference we'll attach to a chart of accounts
+// later). See SUBMISSION.md W2.
+// -----------------------------------------------------------------------------
+
+model Property {
+  id        String   @id @default(cuid())
+  name      String   @unique          // canonicalized name (e.g. "1234 Elm St")
   createdAt DateTime @default(now())
+  units     Unit[]
+}
+
+model Unit {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  label       String                    // e.g. "Apt 3B"
+  bedrooms    Int?
+  bathrooms   Float?
+  sqft        Int?
+  targetRent  Float?                    // monthly rent target; null = undetermined
+  externalId  String   @unique          // source system's unit id (from CSV) — used for idempotency
+  leases      Lease[]
+  workOrders  WorkOrder[]
+
+  @@index([propertyId])
+}
+
+model Tenant {
+  id         String   @id @default(cuid())
+  firstName  String
+  lastName   String
+  email      String?
+  phone      String?
+  externalId String   @unique           // used for idempotency + orphan lease detection
+  leases     Lease[]
+  createdAt  DateTime @default(now())
+}
+
+model Lease {
+  id         String     @id @default(cuid())
+  tenantId   String
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  unitId     String
+  unit       Unit       @relation(fields: [unitId], references: [id])
+  startDate  DateTime
+  endDate    DateTime
+  monthlyRent Float
+  status     String     @default("active")   // active | ended | notice
+  externalId String     @unique
+  charges    Charge[]
+  payments   Payment[]
+  createdAt  DateTime   @default(now())
+
+  @@index([tenantId])
+  @@index([unitId])
+  @@index([endDate])
+}
+
+model Charge {
+  id          String   @id @default(cuid())
+  leaseId     String
+  lease       Lease    @relation(fields: [leaseId], references: [id])
+  dueDate     DateTime
+  amount      Float
+  category    String                       // rent | late_fee | utility | other
+  accountCode String?                      // phase-2 GL hook
+  externalId  String   @unique
+  createdAt   DateTime @default(now())
+
+  @@index([leaseId])
+  @@index([dueDate])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  leaseId     String
+  lease       Lease    @relation(fields: [leaseId], references: [id])
+  paidDate    DateTime
+  amount      Float
+  method      String?                      // ach | check | card
+  accountCode String?                      // phase-2 GL hook
+  externalId  String   @unique
+  createdAt   DateTime @default(now())
+
+  @@index([leaseId])
+  @@index([paidDate])
+}
+
+model WorkOrder {
+  id          String    @id @default(cuid())
+  unitId      String
+  unit        Unit      @relation(fields: [unitId], references: [id])
+  description String
+  vendor      String?
+  cost        Float?
+  openedDate  DateTime
+  closedDate  DateTime?
+  status      String    @default("open")   // open | closed
+  externalId  String    @unique
+  createdAt   DateTime  @default(now())
+
+  @@index([unitId])
+  @@index([status])
+}
+
+// Import run audit — every import attempt logged with counts + skipped rows
+model ImportRun {
+  id              String   @id @default(cuid())
+  source          String                                // "buildium" | "appfolio" | "yardi"
+  committedAt     DateTime @default(now())
+  tenantsCreated  Int      @default(0)
+  unitsCreated    Int      @default(0)
+  leasesCreated   Int      @default(0)
+  chargesCreated  Int      @default(0)
+  paymentsCreated Int      @default(0)
+  workOrdersCreated Int    @default(0)
+  skippedReport   String                                // JSON blob of dropped rows + reasons
 }
